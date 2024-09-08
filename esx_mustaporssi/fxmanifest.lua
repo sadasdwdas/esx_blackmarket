@@ -1,5 +1,3 @@
-shared_script '@cgac/shared/entity-ai.lua'
-shared_script '@cgac/shared/safe-events.lua'
 fx_version 'cerulean'
 game 'gta5'
 
