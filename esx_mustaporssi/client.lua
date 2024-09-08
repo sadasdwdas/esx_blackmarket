@@ -95,11 +95,9 @@ AddEventHandler('esx_mustaporssi:osta', function(data)
     local pelaajanRahat = 0
 
     if tavara.likanenRaha then
-        local blackMoney = exports.ox_inventory:Search('count', 'black_money') or 0 -- vaihtakaa toi black_money mikä itemi teillä onkaan likanen raha
-        pelaajanRahat = blackMoney
+        pelaajanRahat = exports.ox_inventory:Search('count', 'black_money') or 0
     else
-        local cleanMoney = exports.ox_inventory:Search('count', 'money') or 0 --sama tässä vaihtakaa toi money mikä teillä on käteinen itemi
-        pelaajanRahat = cleanMoney
+        pelaajanRahat = exports.ox_inventory:Search('count', 'money') or 0
     end
 
     if pelaajanRahat >= tavara.hinta then
@@ -113,15 +111,10 @@ AddEventHandler('esx_mustaporssi:osta', function(data)
         if dialog == 'confirm' then
             TriggerServerEvent('esx_mustaporssi:poistaRahat', tavara.hinta, tavara.likanenRaha)
             pelaajaJaNpcAnimaatio(pelaajaPed, npc)
-
             TriggerServerEvent('esx_mustaporssi:suoritaOsto', tavara.name, tavara.hinta, tavara.label, kauppaLabel)
         end
     else
-        lib.notify({
-            title = 'Virhe',
-            description = 'Sinulla ei ole tarpeeksi rahaa!',
-            type = 'error'
-        })
+ESX.ShowNotification('Virhe: ~s~Sinulla ei ole tarpeeksi rahaa!')
     end
 end)
 
