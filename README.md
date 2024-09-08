@@ -8,4 +8,6 @@ es_extended
 
 teaser
 
-https://cdn.discordapp.com/attachments/1282246956164317276/1282274476616192021/asekauppa___Stalker___FiveM_-_Discord_8.9.2024_12.43.23.png?ex=66dec2aa&is=66dd712a&hm=433d7e3ad99599eb3d16171e360093f59249f5481cd4663e785effd52b4af171&
+![image](https://github.com/user-attachments/assets/5db463d4-6778-4d65-981d-e45cd167ba88)
+![image](https://github.com/user-attachments/assets/d0dfa02a-8a42-4afe-8f5f-6d33a13a2df7)
+![image](https://github.com/user-attachments/assets/db37bdad-7fa7-428d-9b1b-85647c4e69a1)
