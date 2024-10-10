@@ -1,5 +1,16 @@
 ESX = exports['es_extended']:getSharedObject()
 
+local onkoOstoKaynnissa = false 
+
+function table.contains(table, element)
+    for _, value in pairs(table) do
+        if value == element then
+            return true
+        end
+    end
+    return false
+end
+
 local function luoNPC(sijainti, pedModel)
     local npcHash = GetHashKey(pedModel)
     RequestModel(npcHash)
@@ -57,9 +68,16 @@ local function setupKauppa(kauppaConfig)
             onSelect = function(data)
                 local valinnat = {}
                 npcHeiluttaa(npc)
+
+                local xPlayer = ESX.GetPlayerData()
+
+                if #kauppaConfig.Tyot > 0 and not table.contains(kauppaConfig.Tyot, xPlayer.job.name) then
+                    ESX.ShowNotification('Et voi asioida tässä kaupassa.')
+                    return
+                end
+
                 for _, tavara in ipairs(kauppaConfig.Tavarat) do
                     local kuvaPolku = 'nui://ox_inventory/web/images/' .. tavara.name .. '.png'
-
                     local iconColor = tavara.likanenRaha and '#FF0000' or '#00FF00'
 
                     table.insert(valinnat, {
@@ -68,7 +86,7 @@ local function setupKauppa(kauppaConfig)
                         event = 'esx_mustaporssi:osta',
                         args = {item = tavara, kauppaLabel = kauppaConfig.label, npc = npc},
                         image = kuvaPolku,
-                        icon = 'fas fa-money-bill-wave', --jos haluut niin tästä voi vaihtaa sen iconin mikä siinä contextissa on
+                        icon = 'fas fa-money-bill-wave',
                         iconColor = iconColor 
                     })
                 end
@@ -92,6 +110,13 @@ AddEventHandler('esx_mustaporssi:osta', function(data)
     local npc = data.npc
     local pelaajaPed = PlayerPedId()
 
+    if onkoOstoKaynnissa then
+        ESX.ShowNotification('Osto on jo käynnissä, odota...')
+        return
+    end
+
+    onkoOstoKaynnissa = true
+
     local pelaajanRahat = 0
 
     if tavara.likanenRaha then
@@ -101,21 +126,34 @@ AddEventHandler('esx_mustaporssi:osta', function(data)
     end
 
     if pelaajanRahat >= tavara.hinta then
+        local maara = 1 
+
+        if not string.find(tavara.name, "WEAPON_") then
+            local input = lib.inputDialog('Määrä', {'Syötä määrä'})
+            if input then
+                maara = tonumber(input[1]) or 1
+            end
+        end
+
+        local kokonaishinta = tavara.hinta * maara
+
         local dialog = lib.alertDialog({
             header = 'Varmistus',
-            content = 'Haluatko varmasti ostaa ' .. tavara.label .. ' hintaan $' .. tavara.hinta .. '?',
+            content = 'Haluatko varmasti ostaa ' .. maara .. ' kpl ' .. tavara.label .. ' hintaan $' .. kokonaishinta .. '?',
             centered = true,
             cancel = true
         })
 
         if dialog == 'confirm' then
-            TriggerServerEvent('esx_mustaporssi:poistaRahat', tavara.hinta, tavara.likanenRaha)
+            TriggerServerEvent('esx_mustaporssi:poistaRahat', kokonaishinta, tavara.likanenRaha)
             pelaajaJaNpcAnimaatio(pelaajaPed, npc)
-            TriggerServerEvent('esx_mustaporssi:suoritaOsto', tavara.name, tavara.hinta, tavara.label, kauppaLabel)
+            TriggerServerEvent('esx_mustaporssi:suoritaOsto', tavara.name, kokonaishinta, tavara.label, kauppaLabel, maara)
         end
     else
-ESX.ShowNotification('Virhe: ~s~Sinulla ei ole tarpeeksi rahaa!')
+        ESX.ShowNotification('Virhe: ~s~Sinulla ei ole tarpeeksi rahaa!')
     end
+
+    onkoOstoKaynnissa = false 
 end)
 
 CreateThread(function()
