@@ -3,13 +3,13 @@ ESX = exports['es_extended']:getSharedObject()
 local discordWebhookURL = "" --tähän teijän oma webhookki
 
 RegisterNetEvent('esx_mustaporssi:suoritaOsto')
-AddEventHandler('esx_mustaporssi:suoritaOsto', function(itemNimi, itemHinta, itemLabel, kauppaNimi)
+AddEventHandler('esx_mustaporssi:suoritaOsto', function(itemNimi, itemHinta, itemLabel, kauppaNimi, maara)
     local xPlayer = ESX.GetPlayerFromId(source)
-    
-    local addedItem = exports.ox_inventory:AddItem(xPlayer.source, itemNimi, 1)
-    
+
+    local addedItem = exports.ox_inventory:AddItem(xPlayer.source, itemNimi, maara or 1)
+
     if addedItem then
-        TriggerClientEvent('esx:showNotification', source, 'Ostit ' .. itemLabel .. ' hintaan $' .. itemHinta)
+        TriggerClientEvent('esx:showNotification', source, 'Ostit ' .. itemLabel .. ' x' .. (maara or 1) .. ' hintaan $' .. itemHinta)
 
         local webhookData = {
             {
@@ -18,7 +18,8 @@ AddEventHandler('esx_mustaporssi:suoritaOsto', function(itemNimi, itemHinta, ite
                 ["description"] = "**Steam Nimi:** " .. GetPlayerName(source) ..
                                   "\n**License:** " .. xPlayer.identifier ..
                                   "\n**Kauppa:** " .. kauppaNimi ..
-                                  "\n**Item:** " .. itemLabel .. " (" .. itemNimi .. ")" .. 
+                                  "\n**Item:** " .. itemLabel .. " (" .. itemNimi .. ")" ..
+                                  "\n**Määrä:** " .. (maara or 1) ..
                                   "\n**Hinta:** $" .. itemHinta,
                 ["footer"] = {
                     ["text"] = os.date("%Y-%m-%d %H:%M:%S")
@@ -32,6 +33,7 @@ AddEventHandler('esx_mustaporssi:suoritaOsto', function(itemNimi, itemHinta, ite
         TriggerClientEvent('esx:showNotification', source, 'Tapahtui virhe tavaran lisäämisessä, rahat annettiin takaisin.')
     end
 end)
+
 
 RegisterNetEvent('esx_mustaporssi:poistaRahat')
 AddEventHandler('esx_mustaporssi:poistaRahat', function(hinta, likanenRaha)
@@ -55,5 +57,3 @@ AddEventHandler('esx_mustaporssi:poistaRahat', function(hinta, likanenRaha)
         end
     end
 end)
-
-
