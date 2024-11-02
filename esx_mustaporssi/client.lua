@@ -72,7 +72,7 @@ local function setupKauppa(kauppaConfig)
                 local xPlayer = ESX.GetPlayerData()
 
                 if #kauppaConfig.Tyot > 0 and not table.contains(kauppaConfig.Tyot, xPlayer.job.name) then
-                    ESX.ShowNotification('Et voi asioida tässä kaupassa.')
+                    ESX.ShowNotification('Et voi asioida tässä kaupassa työsi perusteella.')
                     return
                 end
 
@@ -93,7 +93,7 @@ local function setupKauppa(kauppaConfig)
 
                 lib.registerContext({
                     id = kauppaConfig.label .. '_menu',
-                    title = kauppaConfig.label,
+                    title = "Tukku",
                     options = valinnat
                 })
 
@@ -118,43 +118,44 @@ AddEventHandler('esx_mustaporssi:osta', function(data)
     onkoOstoKaynnissa = true
 
     local pelaajanRahat = 0
-
     if tavara.likanenRaha then
         pelaajanRahat = exports.ox_inventory:Search('count', 'black_money') or 0
     else
         pelaajanRahat = exports.ox_inventory:Search('count', 'money') or 0
     end
 
-    if pelaajanRahat >= tavara.hinta then
-        local maara = 1 
-
-        if not string.find(tavara.name, "WEAPON_") then
-            local input = lib.inputDialog('Määrä', {'Syötä määrä'})
-            if input then
-                maara = tonumber(input[1]) or 1
-            end
+    local maara = 1
+    if not string.find(tavara.name, "WEAPON_") then
+        local input = lib.inputDialog('Määrä', {'Syötä määrä'})
+        if input then
+            maara = tonumber(input[1]) or 1
         end
+    end
 
-        local kokonaishinta = tavara.hinta * maara
+    local kokonaishinta = tavara.hinta * maara
 
-        local dialog = lib.alertDialog({
-            header = 'Varmistus',
-            content = 'Haluatko varmasti ostaa ' .. maara .. ' kpl ' .. tavara.label .. ' hintaan $' .. kokonaishinta .. '?',
-            centered = true,
-            cancel = true
-        })
+    if pelaajanRahat < kokonaishinta then
+        ESX.ShowNotification('Sinulla ei ole tarpeeksi rahaa ostaaksesi tätä tuotetta!')
+        onkoOstoKaynnissa = false
+        return
+    end
 
-        if dialog == 'confirm' then
-            TriggerServerEvent('esx_mustaporssi:poistaRahat', kokonaishinta, tavara.likanenRaha)
-            pelaajaJaNpcAnimaatio(pelaajaPed, npc)
-            TriggerServerEvent('esx_mustaporssi:suoritaOsto', tavara.name, kokonaishinta, tavara.label, kauppaLabel, maara)
-        end
-    else
-        ESX.ShowNotification('Virhe: ~s~Sinulla ei ole tarpeeksi rahaa!')
+    local dialog = lib.alertDialog({
+        header = 'Varmistus',
+        content = 'Haluatko varmasti ostaa ' .. maara .. ' kpl ' .. tavara.label .. ' hintaan $' .. kokonaishinta .. '?',
+        centered = true,
+        cancel = true
+    })
+
+    if dialog == 'confirm' then
+        TriggerServerEvent('esx_mustaporssi:poistaRahat', kokonaishinta, tavara.likanenRaha)
+        pelaajaJaNpcAnimaatio(pelaajaPed, npc)
+        TriggerServerEvent('esx_mustaporssi:suoritaOsto', tavara.name, tavara.hinta, tavara.label, kauppaLabel, maara)
     end
 
     onkoOstoKaynnissa = false 
 end)
+
 
 CreateThread(function()
     for _, kauppaConfig in pairs(Config.Kaupat) do
