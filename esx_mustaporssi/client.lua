@@ -64,7 +64,7 @@ local function setupKauppa(kauppaConfig)
         {
             name = kauppaConfig.label,
             icon = kauppaConfig.icon, 
-            label = kauppaConfig.label, 
+            label = kauppaConfig.labeltarget, 
             onSelect = function(data)
                 local valinnat = {}
                 npcHeiluttaa(npc)
@@ -93,7 +93,7 @@ local function setupKauppa(kauppaConfig)
 
                 lib.registerContext({
                     id = kauppaConfig.label .. '_menu',
-                    title = "Tukku",
+                    title = kauppaConfig.label,
                     options = valinnat
                 })
 
